@@ -1,0 +1,2287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>MECHA MARKET</title>
+
+<!-- Google Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Orbit&display=swap" rel="stylesheet">
+
+<style>
+:root {
+    --cyan: #2962ff; --purple: #5c3dde; --bg: #131722;
+    --panel: #1e222d; --text: #d1d4dc; --up: #089981; --down: #f23645;
+    --border: #2a2e39; --hover: #2a2e39; --accent: #2962ff;
+}
+
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    background-color: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Inter', sans-serif;
+    overflow: hidden;
+    -webkit-font-smoothing: antialiased;
+    font-size: 13px;
+    overscroll-behavior: none;
+    -webkit-tap-highlight-color: transparent;
+}
+
+
+/* Budget Overlay */
+#budget-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(30, 34, 45, 0.95);
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+    text-align: center;
+}
+
+#budget-overlay h2 {
+    font-family: 'Orbit', sans-serif;
+    color: var(--cyan);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    font-size: 1.5rem;
+    margin: 0 0 16px 0;
+    text-shadow: 0 0 15px rgba(0, 242, 255, 0.3);
+}
+
+#budget-overlay p {
+    color: var(--purple);
+    font-size: 0.95rem;
+    margin: 0 0 24px 0;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+}
+
+/* Mode Selection Overlay (PC vs Mobile) - shown once on first launch */
+#mode-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(30, 34, 45, 0.95);
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+    text-align: center;
+}
+
+#mode-overlay h2 {
+    font-family: 'Orbit', sans-serif;
+    color: var(--cyan);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    font-size: 1.5rem;
+    margin: 0 0 16px 0;
+    text-shadow: 0 0 15px rgba(0, 242, 255, 0.3);
+}
+
+#mode-overlay p {
+    color: var(--purple);
+    font-size: 0.95rem;
+    margin: 0 0 24px 0;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+}
+
+/* Budget input styling - no arrows, colorful */
+#budget-input {
+    background: var(--panel);
+    border: 2px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 20px;
+    font-size: 1.4rem;
+    font-weight: 600;
+    color: var(--cyan);
+    text-align: center;
+    width: 220px;
+    outline: none;
+    transition: all 0.2s;
+}
+
+#budget-input:focus {
+    border-color: var(--cyan);
+    box-shadow: 0 0 0 3px rgba(41, 98, 255, 0.2);
+}
+
+/* Hide number input arrows */
+#budget-input::-webkit-outer-spin-button,
+#budget-input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    appearance: none;
+    margin: 0;
+}
+
+/* Firefox hide arrows */
+#budget-input[type=number] {
+    -moz-appearance: textfield;
+}
+
+.mode-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.mode-buttons button {
+    padding: 18px 28px;
+    font-family: 'Inter', sans-serif;
+    font-weight: 700;
+    cursor: pointer;
+    text-transform: uppercase;
+    border-radius: 8px;
+    transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+    outline: none;
+    background: transparent;
+    font-size: 0.85rem;
+    letter-spacing: 2px;
+    /* no shadow */
+    width: 100%;
+    border: 2px solid var(--border);
+    color: var(--text);
+}
+
+.mode-buttons button:hover {
+    border-color: var(--cyan);
+    color: #fff;
+    background: rgba(255, 255, 255, 0.03);
+}
+
+.btn-mode-pc { border-color: var(--cyan); color: var(--cyan); }
+.btn-mode-pc:hover { background: rgba(41, 98, 255, 0.12); color: var(--cyan); }
+
+.btn-mode-mobile { border-color: var(--purple); color: var(--purple); }
+.btn-mode-mobile:hover { background: rgba(92, 61, 222, 0.12); color: var(--purple); }
+
+.mode-buttons button:active {
+    transform: translateY(3px);
+    /* no shadow */
+}
+
+#app-root {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    height: 100dvh;
+    width: 100vw;
+    overflow: hidden;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* TradingView-style Top Toolbar */
+.tv-toolbar {
+    display: none;
+    background: var(--bg);
+    border-bottom: 1px solid var(--border);
+    padding: 8px 12px;
+    align-items: center;
+    gap: 16px;
+    flex-shrink: 0;
+}
+.tv-toolbar { display: flex; }
+
+.tv-toolbar-left {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.tv-symbol {
+    font-weight: 600;
+    font-size: 14px;
+    color: #fff;
+    padding: 4px 8px;
+    background: var(--panel);
+    border-radius: 4px;
+    border: 1px solid var(--border);
+}
+
+.tv-toolbar-right {
+    margin-left: auto;
+    display: flex;
+    gap: 8px;
+}
+
+.tv-btn {
+    padding: 6px 12px;
+    font-size: 12px;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    color: var(--text);
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+.tv-btn:hover { background: var(--hover); border-color: #434651; }
+
+/* TradingView-style Main Layout */
+.tv-layout {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+}
+
+/* Left Toolbar */
+.tv-leftbar {
+    width: 52px;
+    background: var(--bg);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    padding: 8px 0;
+    flex-shrink: 0;
+}
+
+.tv-tool {
+    width: 36px;
+    height: 36px;
+    margin: 2px auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    cursor: pointer;
+    color: #a0a4ad;
+    transition: all 0.15s;
+    border: 1.5px solid transparent;
+}
+
+.tv-tool:hover {
+    border-color: #4a4f5c;
+    color: #d1d4dc;
+    background: rgba(42, 46, 57, 0.5);
+}
+.tv-tool.active {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: rgba(41, 98, 255, 0.1);
+}
+
+/* Tool Icons - Hollow/Outline Style */
+.tv-tool .icon-cursor {
+    width: 14px;
+    height: 14px;
+    border: 1.5px solid currentColor;
+    border-radius: 50%;
+    position: relative;
+}
+.tv-tool .icon-cursor::after {
+    content: '';
+    position: absolute;
+    width: 6px;
+    height: 6px;
+    background: currentColor;
+    border-radius: 50%;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.tv-tool .icon-line {
+    width: 18px;
+    height: 18px;
+    position: relative;
+}
+.tv-tool .icon-line::before {
+    content: '';
+    position: absolute;
+    width: 16px;
+    height: 1.5px;
+    background: currentColor;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) rotate(-45deg);
+}
+
+.tv-tool .icon-delete {
+    width: 16px;
+    height: 16px;
+    border: 1.5px solid currentColor;
+    border-radius: 2px;
+    position: relative;
+}
+.tv-tool .icon-delete::before {
+    content: '';
+    position: absolute;
+    width: 8px;
+    height: 1.5px;
+    background: currentColor;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.tv-tool .icon-pencil {
+    width: 16px;
+    height: 16px;
+    position: relative;
+}
+.tv-tool .icon-pencil::before {
+    content: '';
+    position: absolute;
+    width: 2px;
+    height: 14px;
+    background: currentColor;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) rotate(-45deg);
+}
+.tv-tool .icon-pencil::after {
+    content: '';
+    position: absolute;
+    width: 0;
+    height: 0;
+    border-left: 3px solid transparent;
+    border-right: 3px solid transparent;
+    border-top: 5px solid currentColor;
+    top: 2px;
+    left: 50%;
+    transform: translateX(-50%) rotate(-45deg);
+}
+
+/* Color Picker */
+.tv-color-picker {
+    width: 36px;
+    height: 36px;
+    margin: 2px auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    cursor: pointer;
+    overflow: hidden;
+}
+
+.tv-color-picker input[type="color"] {
+    width: 28px;
+    height: 28px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    padding: 0;
+    background: none;
+}
+
+.tv-color-picker input[type="color"]::-webkit-color-swatch-wrapper {
+    padding: 0;
+}
+
+.tv-color-picker input[type="color"]::-webkit-color-swatch {
+    border: 2px solid var(--border);
+    border-radius: 4px;
+}
+
+/* Chart Area */
+.tv-chart-area {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    background: var(--bg);
+    position: relative;
+    overflow: hidden;
+    min-width: 0;
+}
+
+/* Canvas fills container */
+#chart-canvas-wrap {
+    flex: 1;
+    min-height: 0;
+    min-width: 0;
+    position: relative;
+}
+
+#chart-canvas-wrap canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
+.tv-chart-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--border);
+    font-size: 12px;
+}
+
+.tv-chart-header span { color: #868993; }
+.tv-chart-header span.up { color: var(--up); }
+.tv-chart-header span.down { color: var(--down); }
+
+/* Right Panel */
+.tv-rightbar {
+    width: 280px;
+    background: var(--bg);
+    border-left: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+}
+
+.tv-panel-header {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+    font-weight: 600;
+    font-size: 13px;
+    color: #fff;
+}
+
+.tv-panel-content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 12px;
+    scrollbar-width: thin;
+    scrollbar-color: #3a3f4b transparent;
+}
+
+/* Webkit scrollbar for positions panel - dark grey transparent style */
+.tv-panel-content::-webkit-scrollbar {
+    width: 6px;
+    background: transparent;
+}
+.tv-panel-content::-webkit-scrollbar-track {
+    background: transparent;
+}
+.tv-panel-content::-webkit-scrollbar-thumb {
+    background: #3a3f4b;
+    border-radius: 3px;
+}
+.tv-panel-content::-webkit-scrollbar-thumb:hover {
+    background: #4a5060;
+}
+
+/* Trading Panel in Rightbar */
+.tv-trading {
+    padding: 12px;
+    border-bottom: 1px solid var(--border);
+}
+
+.tv-balance {
+    font-size: 12px;
+    color: #868993;
+    margin-bottom: 4px;
+}
+
+.tv-balance-val {
+    font-size: 20px;
+    font-weight: 600;
+    color: #fff;
+    margin-bottom: 12px;
+}
+
+.tv-pl {
+    font-size: 12px;
+    color: #868993;
+    margin-bottom: 12px;
+}
+
+.tv-pl-val {
+    font-weight: 600;
+}
+
+.tv-trade-buttons {
+    display: flex;
+    gap: 8px;
+}
+
+.tv-btn-buy, .tv-btn-sell {
+    flex: 1;
+    padding: 10px;
+    font-size: 13px;
+    font-weight: 600;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+.tv-btn-buy {
+    background: var(--up);
+    color: #fff;
+}
+
+.tv-btn-buy:hover { background: #0aae8c; }
+
+.tv-btn-sell {
+    background: var(--down);
+    color: #fff;
+}
+
+.tv-btn-sell:hover { background: #d12f3d; }
+
+.tv-btn-buy.flash {
+    animation: tvFlashBuy 0.3s ease-out;
+}
+
+.tv-btn-sell.flash {
+    animation: tvFlashSell 0.3s ease-out;
+}
+
+@keyframes tvFlashBuy {
+    0% { filter: brightness(1); }
+    50% { filter: brightness(1.3); }
+    100% { filter: brightness(1); }
+}
+
+@keyframes tvFlashSell {
+    0% { filter: brightness(1); }
+    50% { filter: brightness(1.3); }
+    100% { filter: brightness(1); }
+}
+
+/* Positions List - Card Style */
+#tv-position-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.tv-position-card {
+    background: #1e222d;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 10px 12px;
+    font-size: 12px;
+}
+
+.tv-position-card:hover {
+    background: var(--hover);
+}
+
+.tv-position-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 4px;
+}
+
+.tv-position-row:last-child {
+    margin-bottom: 0;
+}
+
+.tv-position-label {
+    color: #868993;
+    font-size: 11px;
+}
+
+.tv-position-value {
+    color: #fff;
+    font-weight: 500;
+}
+
+.tv-position-pl {
+    font-weight: 600;
+}
+
+.tv-pos-empty {
+    text-align: center;
+    padding: 40px 20px;
+    color: #868993;
+    font-size: 12px;
+}
+
+.stats-container { 
+    display: flex; gap: 40px; margin-bottom: 25px; 
+    font-size: 0.9rem; letter-spacing: 1px; font-weight: 700;
+}
+#cash-val { color: var(--up); }
+
+.controls { display: none; }
+
+button {
+    padding: 12px 24px;
+    font-family: 'Inter', sans-serif;
+    font-weight: 700;
+    cursor: pointer;
+    text-transform: uppercase;
+    border-radius: 6px;
+    transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1); 
+    outline: none;
+    background: transparent;
+    font-size: 0.75rem;
+    letter-spacing: 0.5px;
+    /* no shadow */
+}
+
+button:active {
+    transform: translateY(3px);
+    /* no shadow */
+}
+
+.main-content {
+    display: flex; gap: 20px; align-items: flex-start; justify-content: center;
+    width: 100%; max-width: 1300px;
+}
+
+.chart-canvas-wrap {
+    display: block;
+    position: relative;
+    min-height: 0;
+    width: 100%;
+    height: 100%;
+}
+#chart-box {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    padding: 12px 0 10px 10px;
+    border-radius: 12px;
+    position: relative;
+    /* no shadow */
+    height: 500px;
+}
+
+#chart-box canvas#tradingChart {
+    cursor: default;
+    touch-action: none;
+}
+#chart-box canvas#tradingChart:active {
+    cursor: default;
+}
+
+.portfolio-panel {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    width: 400px; height: 455px;
+    display: flex; flex-direction: column;
+    overflow: hidden;
+    /* no shadow */
+}
+
+.portfolio-header {
+    padding: 18px;
+    font-family: 'Orbit', sans-serif;
+    font-size: 0.7rem;
+    color: var(--cyan);
+    border-bottom: 1px solid var(--border);
+    letter-spacing: 2px;
+}
+
+.scroll-area { flex-grow: 1; overflow-y: auto; padding: 0 15px; }
+
+table { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
+th { 
+    text-align: left; padding: 15px 8px; color: #555; border-bottom: 1px solid #222; 
+    font-size: 0.65rem; text-transform: uppercase; letter-spacing: 1px;
+    position: sticky; top: 0; background: var(--panel); z-index: 10;
+}
+td { padding: 14px 8px; border-bottom: 1px solid #16161a; font-weight: 500; }
+
+.pos-up { color: var(--up); }
+.pos-down { color: var(--down); }
+
+.scroll-area::-webkit-scrollbar { width: 3px; }
+.scroll-area::-webkit-scrollbar-track { background: transparent; }
+.scroll-area::-webkit-scrollbar-thumb { background: #222; border-radius: 10px; }
+.scroll-area::-webkit-scrollbar-thumb:hover { background: var(--purple); }
+
+.corner-controls {
+    position: fixed;
+    bottom: 8px;
+    left: 8px;
+    z-index: 100;
+    display: flex;
+    gap: 6px;
+}
+.corner-controls button {
+    margin-top: 0;
+    background: #1e222d;
+    color: #868993;
+    border: 1px solid #2a2e39;
+    font-size: 11px;
+    cursor: pointer;
+    transition: all 0.3s;
+    opacity: 0.7;
+    padding: 6px 12px;
+    border-radius: 4px;
+    font-family: 'Inter', sans-serif;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+.corner-controls button:hover { color: #666; opacity: 1; background: rgba(255,255,255,0.05); }
+.corner-controls button:active { transform: translateY(2px); }
+
+/* ================================================================
+   MOBILE MODE — explicitly chosen by the user (PC vs Mobile picker)
+   and remembered across visits via localStorage. Applies whenever
+   body has class "mode-mobile", regardless of actual screen size,
+   so the user's choice is authoritative.
+   Reflows the same TradingView-style layout into a modern
+   app-style trading UI: compact header, horizontal drawing tools,
+   touch-enabled chart, and a thumb-friendly trade/positions panel.
+   ================================================================ */
+body.mode-mobile { font-size: 14px; }
+
+/* Compact top toolbar */
+body.mode-mobile .tv-toolbar { padding: 8px 10px; gap: 8px; }
+body.mode-mobile .tv-symbol { font-size: 12px; padding: 4px 7px; }
+body.mode-mobile .tv-toolbar-right { gap: 6px; }
+body.mode-mobile .tv-btn { padding: 6px 9px; font-size: 10px; letter-spacing: 0.3px; }
+
+/* Stack chart on top, trading panel below */
+body.mode-mobile .tv-layout { flex-direction: column; }
+
+/* Drawing toolbar becomes a horizontal strip above the chart */
+body.mode-mobile .tv-leftbar {
+    width: 100%;
+    height: 48px;
+    flex-direction: row;
+    align-items: center;
+    border-right: none;
+    border-bottom: 1px solid var(--border);
+    padding: 0 8px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    flex-shrink: 0;
+}
+body.mode-mobile .tv-leftbar::-webkit-scrollbar { display: none; }
+
+body.mode-mobile .tv-tool { margin: 0 4px 0 0; flex-shrink: 0; }
+body.mode-mobile .tv-color-picker { margin: 0 4px 0 0; flex-shrink: 0; }
+
+body.mode-mobile .tv-chart-area { flex: 1 1 46%; min-height: 220px; }
+body.mode-mobile .tv-chart-header { padding: 6px 10px; gap: 8px; font-size: 11px; }
+body.mode-mobile .tv-chart-header span { font-size: 11px; }
+
+/* Trading + positions panel sits below the chart, app-bottom-sheet style */
+body.mode-mobile .tv-rightbar {
+    width: 100%;
+    border-left: none;
+    border-top: 1px solid var(--border);
+    flex: 1 1 54%;
+    min-height: 240px;
+}
+
+body.mode-mobile .tv-trading { padding: 12px 14px; }
+body.mode-mobile .tv-balance { font-size: 11px; }
+body.mode-mobile .tv-balance-val { font-size: 24px; margin-bottom: 10px; }
+body.mode-mobile .tv-pl { font-size: 11px; margin-bottom: 10px; }
+
+/* Bigger, thumb-friendly Buy / Sell buttons */
+body.mode-mobile .tv-trade-buttons { gap: 10px; }
+body.mode-mobile .tv-btn-buy, body.mode-mobile .tv-btn-sell {
+    padding: 15px 10px;
+    font-size: 14px;
+    letter-spacing: 0.5px;
+    border-radius: 8px;
+}
+
+body.mode-mobile .tv-panel-header {
+    padding: 10px 14px;
+    font-size: 12px;
+    position: sticky;
+    top: 0;
+    background: var(--bg);
+    z-index: 5;
+}
+body.mode-mobile .tv-panel-content { padding: 10px; }
+
+body.mode-mobile .tv-position-card { padding: 12px 14px; font-size: 13px; }
+body.mode-mobile .tv-position-label { font-size: 11px; }
+
+body.mode-mobile .corner-controls {
+    bottom: max(8px, env(safe-area-inset-bottom));
+    left: 8px;
+}
+body.mode-mobile .corner-controls button { padding: 7px 12px; font-size: 10px; }
+
+/* The canvas always captures touch gestures (pan/draw/pinch) cleanly,
+   preventing the page from scrolling or zooming underneath it,
+   regardless of chosen mode (useful for touch-capable PCs too) */
+#tradingChart { touch-action: none; }
+
+/* Extra-small phones (narrow portrait) get a bit more compaction */
+@media (max-width: 380px) {
+    body.mode-mobile .tv-symbol { font-size: 11px; padding: 3px 6px; }
+    body.mode-mobile .tv-btn { padding: 5px 7px; font-size: 9px; }
+    body.mode-mobile .tv-balance-val { font-size: 21px; }
+    body.mode-mobile .tv-btn-buy, body.mode-mobile .tv-btn-sell { font-size: 13px; padding: 13px 8px; }
+}
+
+/* Budget/mode overlays stay usable on very small screens */
+@media (max-width: 360px) {
+    #budget-input { width: 180px; font-size: 1.2rem; }
+    #budget-overlay h2, #mode-overlay h2 { font-size: 1.25rem; }
+}
+
+/* ================================================================
+   ROTATE-TO-PORTRAIT NOTICE — Mobile Mode is designed for portrait
+   use. If the phone is turned sideways, show an advisory overlay
+   asking the user to rotate back. This is informational only: it
+   does not lock or block the OS orientation, it just covers the UI
+   with a clear message until the phone is portrait again.
+   ================================================================ */
+#rotate-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(19, 23, 34, 0.97);
+    z-index: 3000;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 24px;
+}
+
+#rotate-overlay .rotate-icon {
+    font-size: 42px;
+    margin-bottom: 18px;
+    display: inline-block;
+    animation: rotate-hint 1.8s ease-in-out infinite;
+}
+
+@keyframes rotate-hint {
+    0%, 100% { transform: rotate(0deg); }
+    50% { transform: rotate(-90deg); }
+}
+
+#rotate-overlay h2 {
+    font-family: 'Orbit', sans-serif;
+    color: var(--cyan);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    font-size: 1.3rem;
+    margin: 0 0 10px 0;
+    text-shadow: 0 0 15px rgba(0, 242, 255, 0.3);
+}
+
+#rotate-overlay p {
+    color: var(--purple);
+    font-size: 0.9rem;
+    margin: 0;
+    font-weight: 500;
+    letter-spacing: 0.3px;
+    max-width: 280px;
+}
+
+/* Only relevant in Mobile Mode, and only while the device is
+   actually rotated to landscape */
+@media (orientation: landscape) {
+    body.mode-mobile #rotate-overlay { display: flex; }
+}
+
+</style>
+</head>
+<body class="mode-pc">
+
+<!-- App starts directly in PC mode -->
+
+<!-- Device Mode Selection - shown only once, on the very first launch.
+     The choice is saved to localStorage and reused on every future visit. -->
+<div id="mode-overlay" style="display:none;">
+    <h2>Choose Your Mode</h2>
+    <p>How will you be using MECHA MARKET?</p>
+    <div class="mode-buttons" style="width:240px;">
+        <button type="button" class="btn-mode-pc" id="choose-pc-btn">PC Mode</button>
+        <button type="button" class="btn-mode-mobile" id="choose-mobile-btn">Mobile Mode</button>
+    </div>
+</div>
+
+<!-- Budget Setup Dialog - shows only on first launch or after reset -->
+<div id="budget-overlay" style="display:none;">
+    <h2>Set Budget</h2>
+    <p>Choose your starting money</p>
+    <div style="margin: 20px 0;">
+        <input type="number" id="budget-input" value="1000" min="100" max="10000000" step="100">
+    </div>
+    <div class="mode-buttons">
+        <button type="button" class="btn-mode-pc" id="set-budget-btn" style="width:200px;">START</button>
+    </div>
+</div>
+
+<!-- Rotate-to-portrait notice - only shows in Mobile Mode while the
+     phone is held sideways (see @media (orientation: landscape) rule) -->
+<div id="rotate-overlay">
+    <span class="rotate-icon">📱</span>
+    <h2>Rotate Your Device</h2>
+    <p>MECHA MARKET Mobile Mode is designed for portrait. Please rotate your phone back to continue.</p>
+</div>
+
+<div id="app-root">
+
+<!-- TradingView-style Top Toolbar -->
+<div class="tv-toolbar">
+    <div class="tv-toolbar-left">
+        <div class="tv-symbol">MECHAUSD</div>
+    </div>
+    <div class="tv-toolbar-right">
+        <button class="tv-btn" onclick="resetLayout()" data-i18n="resetLayout">Reset</button>
+        <button class="tv-btn" id="fullscreen-btn" onclick="toggleFullscreen()">Fullscreen</button>
+    </div>
+</div>
+
+
+<!-- TradingView-style Main Layout -->
+<div class="tv-layout">
+    <!-- Left Toolbar -->
+    <div class="tv-leftbar">
+        <div class="tv-tool active" title="Cursor" data-tool="cursor">
+            <div class="icon-cursor"></div>
+        </div>
+        <div class="tv-tool" title="Line" data-tool="line">
+            <div class="icon-line"></div>
+        </div>
+        <div class="tv-tool" title="Pencil" data-tool="pencil">
+            <div class="icon-pencil"></div>
+        </div>
+        <div class="tv-color-picker" title="Line Color">
+            <input type="color" id="drawing-color" value="#2962ff" title="Choose line color">
+        </div>
+        <div class="tv-tool" title="Delete" onclick="deleteLastDrawing()">
+            <div class="icon-delete"></div>
+        </div>
+    </div>
+
+    <!-- Chart Area -->
+    <div class="tv-chart-area">
+        <div class="tv-chart-header">
+            <span style="font-weight:600;color:#fff;">MECHAUSD</span>
+            <span id="tv-ohlcv" style="font-size:11px;color:#868993;">O:--- H:--- L:--- C:--- V:---</span>
+        </div>
+        <div id="chart-canvas-wrap" class="chart-canvas-wrap" style="flex:1;min-height:0;">
+            <canvas id="tradingChart"></canvas>
+        </div>
+    </div>
+
+    <!-- Right Panel -->
+    <div class="tv-rightbar">
+        <div class="tv-trading">
+            <div class="tv-balance" data-i18n="balance">Balance</div>
+            <div class="tv-balance-val" id="tv-cash">$1,000.00</div>
+            <div class="tv-pl"><span data-i18n="netpl">P/L:</span> <span class="tv-pl-val" id="tv-pl">$0.00</span></div>
+            <div class="tv-trade-buttons">
+                <button class="tv-btn-buy" onclick="tvBuy()" data-i18n="buy1">Buy</button>
+                <button class="tv-btn-sell" onclick="tvSellAll()" data-i18n="sellAll">Sell All</button>
+            </div>
+        </div>
+        <div class="tv-panel-header" data-i18n="positions">Positions</div>
+        <div class="tv-panel-content">
+            <div id="tv-position-list"></div>
+            <div class="tv-pos-empty" id="tv-no-pos" data-i18n="noPositions">No active positions</div>
+        </div>
+    </div>
+</div>
+
+<div class="corner-controls">
+    <button onclick="resetProgress()" title="Reset Progress (Clears cash & positions)">Reset</button>
+    <button onclick="switchMode()" title="Switch between PC and Mobile mode">Mode</button>
+</div>
+
+</div>
+
+<script>
+let cash = 1000, positions = [], data = [], smaData = [];
+const smaPeriod = 20, mu = 0.0001, sigma = 0.012;
+let zoomX = 1.0, priceStretch = 1.0, vOffset = 0, hOffset = 0;
+let isDragging = false, lastX = 0, lastY = 0;
+
+// Animation removed - candles draw instantly
+let isDraggingPricePanel = false; // PC: drag on Y-axis to stretch
+let layoutMode = 'pc';
+let tickInterval = null;
+
+const STRINGS = {
+    en: {
+        appTitle: 'MECHA MARKET',
+        balance: 'Balance',
+        netpl: 'P/L:',
+        buy1: 'Buy',
+        sellAll: 'Sell All',
+        resetLayout: 'Reset Layout',
+        fullscreen: 'Fullscreen',
+        exitFullscreen: 'Exit Fullscreen',
+        positions: 'Positions',
+        thQty: 'Qty',
+        thEntry: 'Entry',
+        thCurrent: 'Price',
+        thPL: 'P/L',
+        resetSession: 'Reset Session Data',
+        noPositions: 'No active positions',
+        tipO: 'O:',
+        tipH: 'H:',
+        tipL: 'L:',
+        tipC: 'C:',
+        tipV: 'V:'
+    }
+};
+
+function t(k) {
+    return STRINGS.en[k] || k;
+}
+
+function syncFullscreenButtonLabel() {
+    const btns = document.querySelectorAll('.btn-fullscreen');
+    btns.forEach(btn => {
+        btn.textContent = document.fullscreenElement ? t('exitFullscreen') : t('fullscreen');
+    });
+}
+
+function applyI18n() {
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+        const k = el.getAttribute('data-i18n');
+        if (k) el.textContent = t(k);
+    });
+    document.querySelectorAll('[data-i18n-html]').forEach(el => {
+        const k = el.getAttribute('data-i18n-html');
+        if (k) el.innerHTML = t(k);
+    });
+    document.querySelectorAll('[data-i18n-title]').forEach(el => {
+        const k = el.getAttribute('data-i18n-title');
+        if (k) el.setAttribute('title', t(k));
+    });
+    document.querySelectorAll('[data-i18n-aria]').forEach(el => {
+        const k = el.getAttribute('data-i18n-aria');
+        if (k) el.setAttribute('aria-label', t(k));
+    });
+    syncFullscreenButtonLabel();
+}
+
+const canvas = document.getElementById('tradingChart');
+const ctx = canvas.getContext('2d');
+let prWidth = 95, volPanelHeight = 80;
+
+function isStretchDrag() {
+    return isDraggingPricePanel;
+}
+
+function nudgeZoom(delta) {
+    zoomX = Math.max(0.3, Math.min(5, zoomX + delta));
+    render();
+}
+
+function resizeChartForLayout() {
+    const wrap = document.getElementById('chart-canvas-wrap');
+    if (!wrap) return;
+    
+    const rect = wrap.getBoundingClientRect();
+    const innerW = Math.floor(rect.width);
+    const innerH = Math.floor(rect.height);
+    
+    if (innerW === 0 || innerH === 0) return;
+    
+    canvas.width = innerW;
+    canvas.height = innerH;
+    canvas.style.width = innerW + 'px';
+    canvas.style.height = innerH + 'px';
+    
+    prWidth = innerW < 480 ? 54 : 70;
+    volPanelHeight = Math.max(60, Math.floor(innerH * 0.2));
+}
+
+// Device mode (PC vs Mobile) is chosen explicitly by the user on first
+// launch and remembered from then on — it does NOT auto-switch based on
+// window width, so the user's choice is always authoritative.
+const DEVICE_MODE_KEY = 'mechaMarketDeviceMode';
+
+function applyDeviceMode(mode) {
+    layoutMode = mode === 'mobile' ? 'mobile' : 'pc';
+    document.body.classList.toggle('mode-mobile', layoutMode === 'mobile');
+    document.body.classList.toggle('mode-pc', layoutMode === 'pc');
+    requestAnimationFrame(() => {
+        resizeChartForLayout();
+        render();
+        setTimeout(() => {
+            resizeChartForLayout();
+            render();
+        }, 100);
+    });
+}
+
+function switchMode() {
+    localStorage.removeItem(DEVICE_MODE_KEY);
+    location.reload();
+}
+
+function addStep(prev) {
+    const epsilon = (Math.random() * 2 - 1) + (Math.random() * 2 - 1) + (Math.random() * 2 - 1);
+    const returnVal = mu + sigma * (epsilon / 3);
+    const close = prev * Math.exp(returnVal);
+    const moveRange = Math.abs(close - prev);
+    data.push({ 
+        open: prev, close, 
+        high: Math.max(prev, close) + Math.random()*(moveRange*0.5), 
+        low: Math.min(prev, close) - Math.random()*(moveRange*0.5), 
+        volume: Math.floor(Math.random()*8000+2000)
+    });
+    if(data.length > 1000) data.shift();
+    // Animation removed
+    if(data.length >= smaPeriod) {
+        let sum = 0; for(let i=data.length-smaPeriod; i<data.length; i++) sum += data[i].close;
+        smaData.push(sum/smaPeriod); if(smaData.length > 1000) smaData.shift();
+    }
+    return close;
+}
+
+function updateUI() {
+    if (!data.length) return;
+    const cp = data[data.length-1].close;
+    const d0 = data[data.length-1];
+    const d1 = data.length > 1 ? data[data.length-2] : d0;
+    const change = d0.close - d1.close;
+    const changePct = (change / d1.close) * 100;
+
+    // Legacy UI updates
+    const cashValEl = document.getElementById('cash-val');
+    if (cashValEl) cashValEl.innerText = `$${cash.toLocaleString(undefined, {minimumFractionDigits:2})}`;
+
+    let totalUn = 0, html = '';
+    positions.forEach(pos => {
+        const d = (cp - pos.entry) * pos.units; totalUn += d;
+        html += `<tr><td>${pos.units}</td><td>$${pos.entry.toFixed(2)}</td><td>$${cp.toFixed(2)}</td><td class="${d >= 0 ? 'pos-up' : 'pos-down'}">$${d >= 0 ? '+' : ''}${d.toFixed(2)}</td></tr>`;
+    });
+    
+    const posTable = document.getElementById('position-table');
+    if (posTable) posTable.innerHTML = html || `<tr><td colspan="4" style="text-align:center; padding-top:30px; color:#222; font-size:0.7rem;">${t('noPositions')}</td></tr>`;
+
+    const plValEl = document.getElementById('pl-val');
+    if (plValEl) {
+        plValEl.innerText = `$${totalUn.toFixed(2)}`;
+        plValEl.style.color = totalUn >= 0 ? 'var(--up)' : 'var(--down)';
+    }
+
+    // TradingView-style UI updates
+    const tvCash = document.getElementById('tv-cash');
+    if (tvCash) tvCash.innerText = `$${cash.toLocaleString(undefined, {minimumFractionDigits:2})}`;
+
+    const tvPl = document.getElementById('tv-pl');
+    if (tvPl) {
+        tvPl.innerText = `${totalUn >= 0 ? '+' : ''}$${totalUn.toFixed(2)}`;
+        tvPl.className = 'tv-pl-val ' + (totalUn >= 0 ? 'up' : 'down');
+    }
+
+    const tvPrice = document.getElementById('tv-price');
+    if (tvPrice) {
+        tvPrice.innerText = cp.toFixed(2);
+        tvPrice.className = change >= 0 ? 'up' : 'down';
+    }
+
+    const tvChange = document.getElementById('tv-change');
+    if (tvChange) {
+        const sign = change >= 0 ? '+' : '';
+        tvChange.innerText = `${sign}${change.toFixed(2)} (${sign}${changePct.toFixed(2)}%)`;
+        tvChange.className = change >= 0 ? 'up' : 'down';
+    }
+
+    const tvVol = document.getElementById('tv-vol');
+    if (tvVol) tvVol.innerText = Math.round(d0.volume).toLocaleString();
+
+    // Top bar OHLCV display with colors
+    const tvOhlcv = document.getElementById('tv-ohlcv');
+    if (tvOhlcv) {
+        const isUp = d0.close >= d0.open;
+        const ohlcvColor = isUp ? '#089981' : '#f23645';
+        tvOhlcv.innerHTML = `<span style="color:${ohlcvColor}">O:${d0.open.toFixed(2)} H:${d0.high.toFixed(2)} L:${d0.low.toFixed(2)} C:${d0.close.toFixed(2)}</span> <span style="color:#868993">V:${Math.floor(d0.volume)}</span>`;
+    }
+
+    // TradingView positions list (card style)
+    const tvPosList = document.getElementById('tv-position-list');
+    const tvNoPos = document.getElementById('tv-no-pos');
+    if (tvPosList) {
+        if (positions.length) {
+            let tvHtml = '';
+            positions.forEach(pos => {
+                const d = (cp - pos.entry) * pos.units;
+                const plClass = d >= 0 ? 'up' : 'down';
+                const plSign = d >= 0 ? '+' : '';
+                tvHtml += `
+                    <div class="tv-position-card">
+                        <div class="tv-position-row">
+                            <span class="tv-position-label">Qty</span>
+                            <span class="tv-position-value">${pos.units}</span>
+                        </div>
+                        <div class="tv-position-row">
+                            <span class="tv-position-label">Entry</span>
+                            <span class="tv-position-value">$${pos.entry.toFixed(2)}</span>
+                        </div>
+                        <div class="tv-position-row">
+                            <span class="tv-position-label">Current</span>
+                            <span class="tv-position-value">$${cp.toFixed(2)}</span>
+                        </div>
+                        <div class="tv-position-row">
+                            <span class="tv-position-label">P/L</span>
+                            <span class="tv-position-value tv-position-pl ${plClass}">${plSign}$${d.toFixed(2)}</span>
+                        </div>
+                    </div>
+                `;
+            });
+            tvPosList.innerHTML = tvHtml;
+            if (tvNoPos) tvNoPos.style.display = 'none';
+        } else {
+            tvPosList.innerHTML = '';
+            if (tvNoPos) tvNoPos.style.display = 'block';
+        }
+    }
+}
+
+function render() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    const pt = 15, pb = 0, volAreaHeight = canvas.height * 0.25, cw = canvas.width - prWidth, ch = canvas.height - (pt + pb) - volAreaHeight;
+    const spacing = Math.max(3, 6 * zoomX), visibleCount = Math.ceil(cw / spacing) + 2, visibleData = data.slice(-visibleCount);
+    if(!visibleData.length) return;
+    const prices = visibleData.flatMap(d => [d.high, d.low]);
+    const rawMin = Math.min(...prices), rawMax = Math.max(...prices);
+    const range = rawMax - rawMin || 1;
+    const effectiveRange = range * priceStretch;
+    const minP = rawMin - (effectiveRange - range) / 2;
+    const maxP = rawMax + (effectiveRange - range) / 2;
+    const pRange = maxP - minP;
+    const getY = (p) => pt + ((maxP - p) / pRange) * ch + vOffset;
+
+    // Grid lines - 10 lines for finer granularity
+    const numGridLines = 10;
+    ctx.strokeStyle = 'rgba(200,200,200,0.08)';
+    ctx.lineWidth = 1;
+    for(let i=0; i<=numGridLines; i++) {
+        let y = pt + (ch/numGridLines)*i;
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.lineTo(cw, y);
+        ctx.stroke();
+    }
+
+    // Vertical grid lines - completely fixed position (no panning/zooming)
+    const verticalGridSpacing = 80; // Fixed 80px spacing
+    for (let x = 0; x < cw; x += verticalGridSpacing) {
+        ctx.beginPath();
+        ctx.moveTo(x, pt);
+        ctx.lineTo(x, pt + ch);
+        ctx.stroke();
+    }
+    
+    // Y-axis labels - centered in the price panel area
+    ctx.fillStyle = '#868993';
+    ctx.font = '11px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+    ctx.textBaseline = 'middle';
+    ctx.textAlign = 'center';
+    
+    // Use same count as grid lines for alignment
+    const labelX = cw + prWidth / 2; // Center in the right panel
+    for(let i=0; i<=numGridLines; i++) {
+        let y = pt + (ch/numGridLines)*i;
+        let pAtY = maxP - ((y - pt - vOffset) / ch) * pRange;
+        let priceStr = pAtY.toFixed(2);
+        
+        // Draw label centered in price panel
+        ctx.fillText(priceStr, labelX, y);
+    }
+
+    ctx.save(); ctx.beginPath(); ctx.rect(0, 0, cw, canvas.height); ctx.clip();
+    const maxVol = Math.max(...visibleData.map(v => v.volume));
+    data.forEach((d, i) => {
+        const x = cw - ((data.length - 1 - i) * spacing) - (spacing * 0.5) + hOffset;
+        if (x > -50) {
+            const isUp = d.close >= d.open, theme = isUp ? '#089981' : '#f23645';
+            const candleWidth = spacing * 0.75; // Thicker candles
+            const wickOffset = candleWidth / 2;  // Center wick in candle
+            
+            // Volume bar - no animation
+            const volHeight = (d.volume/maxVol)*volAreaHeight;
+            ctx.fillStyle = isUp ? 'rgba(8,153,129,0.15)' : 'rgba(242,54,69,0.15)';
+            ctx.fillRect(x, canvas.height - volAreaHeight + (volAreaHeight - volHeight), candleWidth, volHeight);
+            
+            // Candle body - no animation
+            const openY = getY(d.open);
+            const closeY = getY(d.close);
+            const bodyTop = Math.min(openY, closeY);
+            const bodyHeight = Math.max(2, Math.abs(closeY - openY));
+            
+            ctx.fillStyle = theme;
+            ctx.fillRect(x, bodyTop, candleWidth, bodyHeight);
+            
+            // Wick - draw AFTER body so tips show on top
+            const highY = getY(d.high);
+            const lowY = getY(d.low);
+            
+            ctx.strokeStyle = theme; 
+            ctx.lineWidth = 2; // Thicker wick for visibility
+            ctx.beginPath(); 
+            // Extend wick 1px beyond body to ensure tips are visible
+            ctx.moveTo(x + wickOffset, highY - 1); 
+            ctx.lineTo(x + wickOffset, lowY + 1); 
+            ctx.stroke();
+        }
+    });
+
+    if(smaData.length > 1) {
+        ctx.strokeStyle = '#bc13fe'; ctx.lineWidth = 1.5; ctx.beginPath();
+        const offset = data.length - smaData.length;
+        smaData.forEach((v, i) => {
+            const x = cw - ((data.length - 1 - (offset + i)) * spacing) - (spacing * 0.35) + hOffset;
+            if(i === 0) ctx.moveTo(x, getY(v)); else ctx.lineTo(x, getY(v));
+        });
+        ctx.stroke();
+    }
+    ctx.restore();
+
+const cp = data[data.length-1].close, py = getY(cp);
+
+ctx.save();
+ctx.strokeStyle = 'rgba(255,255,255,0.5)';
+ctx.lineWidth = 1.2;
+ctx.setLineDash([5, 5]);
+ctx.beginPath();
+ctx.moveTo(0, py);
+ctx.lineTo(cw, py);
+ctx.stroke();
+ctx.restore();
+
+ctx.fillStyle = '#ffffff';
+ctx.fillRect(cw, py - 11, prWidth, 22);
+
+ctx.fillStyle = '#000';
+ctx.font = 'bold 11px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+ctx.textAlign = 'center';
+ctx.textBaseline = 'middle';
+ctx.fillText(cp.toFixed(2), cw + prWidth / 2, py);
+ctx.textAlign = 'left';
+ctx.textBaseline = 'alphabetic';
+    updateUI();
+}
+
+function flashBtn(selector, flashClass) {
+    const btns = document.querySelectorAll(selector);
+    btns.forEach(btn => {
+        btn.classList.remove(flashClass);
+        void btn.offsetWidth;
+        btn.classList.add(flashClass);
+        setTimeout(() => btn.classList.remove(flashClass), 300);
+    });
+}
+function buy(u) { const p = data[data.length-1].close; if(cash >= p*u) { cash -= p*u; positions.push({ units: u, entry: p }); localStorage.setItem('mechaMarket', JSON.stringify({cash, positions})); } flashBtn('.btn-buy', 'flash'); updateUI(); }
+function sellAll() { cash += positions.reduce((s, p) => s + p.units * data[data.length-1].close, 0); positions = []; localStorage.setItem('mechaMarket', JSON.stringify({cash, positions})); flashBtn('.btn-sell', 'flash'); updateUI(); }
+function tvBuy() { buy(1); flashBtn('.tv-btn-buy', 'flash'); }
+function tvSellAll() { sellAll(); flashBtn('.tv-btn-sell', 'flash'); }
+function resetLayout() { vOffset = 0; hOffset = 0; priceStretch = 1.0; zoomX = 1.0; render(); }
+function resetProgress() { cash = 1000; positions = []; localStorage.removeItem('mechaMarket'); localStorage.removeItem('initialBudgetSet'); resetLayout(); location.reload(); }
+
+function toggleFullscreen() {
+    if (!document.fullscreenElement) {
+        if (document.documentElement.requestFullscreen) {
+            document.documentElement.requestFullscreen().catch(() => {
+                showToast('Fullscreen not supported on this device');
+            });
+        } else {
+            showToast('Fullscreen not supported on this device');
+        }
+    } else if (document.exitFullscreen) {
+        document.exitFullscreen().catch(() => {});
+    }
+}
+document.addEventListener('fullscreenchange', () => {
+    syncFullscreenButtonLabel();
+});
+
+
+canvas.addEventListener('mousemove', (e) => {
+    const rect = canvas.getBoundingClientRect();
+    const x = (e.clientX - rect.left) * (canvas.width / rect.width);
+    const y = (e.clientY - rect.top) * (canvas.height / rect.height);
+
+    // Track cursor for crosshair
+    crossX = x;
+    crossY = y;
+    isOverCanvas = true;
+
+    // Handle drawing preview
+    if (isDrawing && drawingTool === 'line') {
+        drawCurrent = { x, y };
+        render();
+        drawPreviewLine();
+        return;
+    }
+
+    // Handle pencil drawing
+    if (isDrawing && drawingTool === 'pencil') {
+        pencilStrokes.push({ x, y });
+        render();
+        drawPencilPreview();
+        return;
+    }
+
+    // Handle chart drag (only when cursor tool and not stretching)
+    if (isDraggingChart && drawingTool === 'cursor' && !isDraggingPricePanel) {
+        const dx = e.clientX - dragStartX;
+        const dy = e.clientY - dragStartY;
+        dragStartX = e.clientX;
+        dragStartY = e.clientY;
+        hOffset += dx;
+        vOffset += dy;
+        render();
+        return;
+    }
+
+    // Handle Y-axis price stretching
+    if (isDraggingPricePanel && drawingTool === 'cursor') {
+        const dy = e.clientY - dragStartY;
+        dragStartY = e.clientY;
+        priceStretch = Math.max(0.2, Math.min(5.0, priceStretch - dy * 0.01));
+        render();
+        return;
+    }
+
+    render();
+});
+
+
+let crossX=null,crossY=null,isOverCanvas=false;
+
+function syncCrossFromClient(cx, cy) {
+    const rect = canvas.getBoundingClientRect();
+    crossX = (cx - rect.left) * (canvas.width / rect.width);
+    crossY = (cy - rect.top) * (canvas.height / rect.height);
+    isOverCanvas = true;
+    render();
+}
+
+function syncCrossFromEvent(e) {
+    const cx = e.clientX !== undefined ? e.clientX
+        : (e.touches && e.touches[0] ? e.touches[0].clientX
+        : (e.changedTouches && e.changedTouches[0] ? e.changedTouches[0].clientX : null));
+    const cy = e.clientY !== undefined ? e.clientY
+        : (e.touches && e.touches[0] ? e.touches[0].clientY
+        : (e.changedTouches && e.changedTouches[0] ? e.changedTouches[0].clientY : null));
+    if (cx == null || cy == null) return;
+    syncCrossFromClient(cx, cy);
+}
+
+canvas.addEventListener('mouseleave',()=>{
+    isOverCanvas=false;
+    // Reset OHLCV to show latest candle data with color
+    const tvOhlcv = document.getElementById('tv-ohlcv');
+    if (tvOhlcv && data.length > 0) {
+        const d0 = data[data.length-1];
+        const isUp = d0.close >= d0.open;
+        const ohlcvColor = isUp ? '#089981' : '#f23645';
+        tvOhlcv.innerHTML = `<span style="color:${ohlcvColor}">O:${d0.open.toFixed(2)} H:${d0.high.toFixed(2)} L:${d0.low.toFixed(2)} C:${d0.close.toFixed(2)}</span> <span style="color:#868993">V:${Math.floor(d0.volume)}</span>`;
+    }
+    render();
+});
+
+function drawCrosshair() {
+    if (crossX === null || crossY === null || !isOverCanvas) return;
+
+    const pt = 15, pb = 0, cw = canvas.width - prWidth, ch = canvas.height - (pt + pb);
+    const spacing = Math.max(3, 6 * zoomX);
+    const visibleCount = Math.ceil(cw / spacing) + 2;
+    const visibleData = data.slice(-visibleCount);
+    if (!visibleData.length) return;
+
+    // Account for hOffset in nearestIdx calculation
+    let nearestIdx = Math.round((cw - (crossX - hOffset)) / spacing);
+    nearestIdx = Math.min(Math.max(0, nearestIdx), visibleData.length - 1);
+    // Candle center X = candle left edge (spacing * 0.5 offset) + half candle width (spacing * 0.375)
+    // = cw - (nearestIdx * spacing) - (spacing * 0.5) + (spacing * 0.375) + hOffset
+    // = cw - (nearestIdx * spacing) - (spacing * 0.125) + hOffset
+    const snapX = cw - (nearestIdx * spacing) - (spacing * 0.125) + hOffset;
+    
+    // Calculate the rightmost candle position (newest candle)
+    const rightmostCandleX = cw - (spacing * 0.125) + hOffset;
+    
+    // Use snap position if near a candle, otherwise follow mouse freely to the right
+    // If mouse is to the right of the newest candle, follow mouse freely
+    const verticalX = (crossX > rightmostCandleX) ? crossX : snapX;
+
+    const prices = visibleData.flatMap(d => [d.high, d.low]);
+    const rawMin = Math.min(...prices), rawMax = Math.max(...prices);
+    const range = rawMax - rawMin || 1;
+    const effectiveRange = range * priceStretch;
+    const minP = rawMin - (effectiveRange - range) / 2;
+    const maxP = rawMax + (effectiveRange - range) / 2;
+    const pRange = maxP - minP;
+
+    ctx.save();
+    ctx.strokeStyle = 'rgba(200,200,200,0.5)';
+    ctx.lineWidth = 1;
+
+    ctx.beginPath();
+    ctx.moveTo(verticalX, 0);
+    ctx.lineTo(verticalX, canvas.height);
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.moveTo(0, crossY);
+    ctx.lineTo(cw, crossY);
+    ctx.stroke();
+
+    ctx.restore();
+
+    const candle = visibleData[nearestIdx];
+    const newestCandle = data[data.length-1];
+
+    // Update OHLCV display with proper color logic
+    const tvOhlcv = document.getElementById('tv-ohlcv');
+    if (tvOhlcv) {
+        // Check if crosshair is close enough to a candlestick (within 1.5 candle widths)
+        const candleWidth = spacing * 0.75;
+        const candleCenterX = cw - (nearestIdx * spacing) - (spacing * 0.125) + hOffset;
+        const distanceToCandle = Math.abs(crossX - candleCenterX);
+        const isNearCandle = distanceToCandle <= candleWidth * 0.75;
+        
+        let displayCandle, isUp;
+        if (isNearCandle && candle) {
+            // Use the candle at crosshair position
+            displayCandle = candle;
+            isUp = displayCandle.close >= displayCandle.open;
+        } else {
+            // Use newest candle when crosshair is not focused on a candlestick
+            displayCandle = newestCandle;
+            isUp = displayCandle.close >= displayCandle.open;
+        }
+        
+        const ohlcvColor = isUp ? '#089981' : '#f23645';
+        tvOhlcv.innerHTML = `<span style="color:${ohlcvColor}">O:${displayCandle.open.toFixed(2)} H:${displayCandle.high.toFixed(2)} L:${displayCandle.low.toFixed(2)} C:${displayCandle.close.toFixed(2)}</span> <span style="color:#868993">V:${Math.floor(displayCandle.volume)}</span>`;
+    }
+
+    const priceAtCross = maxP - ((crossY - pt - vOffset) / ch) * pRange;
+
+    ctx.fillStyle = 'rgba(200,200,200,0.35)';
+    ctx.fillRect(cw, crossY - 11, prWidth, 22);
+
+    ctx.fillStyle = '#000';
+    ctx.font = 'bold 11px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(priceAtCross.toFixed(2), cw + prWidth / 2, crossY);
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'alphabetic';
+}
+const oldRender=render;
+render=function(){ oldRender(); drawCrosshair(); };
+
+canvas.addEventListener('wheel', e => { e.preventDefault(); zoomX = Math.max(0.3, Math.min(5, zoomX - e.deltaY*0.001)); render(); }, {passive: false});
+
+// ============================================================
+// TOUCH SUPPORT (mobile) — mirrors the mouse interactions above:
+// 1 finger  -> pan chart / draw line / draw pencil / stretch Y-axis
+// 2 fingers -> pinch to zoom (horizontal candle spacing)
+// ============================================================
+
+function getChartMetricsForDrawing() {
+    const cw = canvas.width - prWidth;
+    const pt = 15, pb = 0, volAreaHeight = canvas.height * 0.25;
+    const ch = canvas.height - (pt + pb) - volAreaHeight;
+    const spacing = Math.max(3, 6 * zoomX);
+    const visibleCount = Math.ceil(cw / spacing) + 2;
+    const visibleData = data.slice(-visibleCount);
+    if (!visibleData.length) return null;
+    const prices = visibleData.flatMap(d => [d.high, d.low]);
+    const rawMin = Math.min(...prices), rawMax = Math.max(...prices);
+    const range = rawMax - rawMin || 1;
+    const effectiveRange = range * priceStretch;
+    const minP = rawMin - (effectiveRange - range) / 2;
+    const maxP = rawMax + (effectiveRange - range) / 2;
+    const pRange = maxP - minP;
+    return { cw, pt, pb, ch, spacing, maxP, pRange };
+}
+
+function finishLineDrawingAt(endX, endY) {
+    const m = getChartMetricsForDrawing();
+    if (m && drawStart) {
+        const dist = Math.hypot(endX - drawStart.x, endY - drawStart.y);
+        if (dist > 5) {
+            const colorPicker = document.getElementById('drawing-color');
+            const lineColor = colorPicker ? colorPicker.value : '#2962ff';
+            drawings.push({
+                candleIdx1: pixelToCandleIndex(drawStart.x, m.cw, m.spacing, data.length),
+                candleIdx2: pixelToCandleIndex(endX, m.cw, m.spacing, data.length),
+                price1: pixelYToPrice(drawStart.y, m.pt, m.ch, m.maxP, m.pRange),
+                price2: pixelYToPrice(endY, m.pt, m.ch, m.maxP, m.pRange),
+                color: lineColor
+            });
+        }
+    }
+    isDrawing = false;
+    drawStart = null;
+    drawCurrent = null;
+    render();
+}
+
+function finishPencilDrawingNow() {
+    const m = getChartMetricsForDrawing();
+    if (m && pencilStrokes.length > 2) {
+        const colorPicker = document.getElementById('drawing-color');
+        const points = pencilStrokes.map(point => ({
+            candleIdx: pixelToCandleIndex(point.x, m.cw, m.spacing, data.length),
+            price: pixelYToPrice(point.y, m.pt, m.ch, m.maxP, m.pRange)
+        }));
+        drawings.push({
+            type: 'pencil',
+            points: points,
+            color: colorPicker ? colorPicker.value : '#2962ff'
+        });
+    }
+    isDrawing = false;
+    pencilStrokes = [];
+    render();
+}
+
+function canvasPointFromTouch(touch) {
+    const rect = canvas.getBoundingClientRect();
+    return {
+        x: (touch.clientX - rect.left) * (canvas.width / rect.width),
+        y: (touch.clientY - rect.top) * (canvas.height / rect.height)
+    };
+}
+
+let touchPinchStartDist = null;
+let touchPinchStartZoom = 1;
+let isTouchPanning = false;
+
+canvas.addEventListener('touchstart', (e) => {
+    e.preventDefault();
+
+    if (e.touches.length === 2) {
+        // Begin pinch-to-zoom; cancel any in-progress single-finger action
+        isDraggingChart = false;
+        isDraggingPricePanel = false;
+        isTouchPanning = false;
+        if (isDrawing) {
+            if (drawingTool === 'pencil') finishPencilDrawingNow();
+            else { isDrawing = false; drawStart = null; drawCurrent = null; render(); }
+        }
+        const dx = e.touches[0].clientX - e.touches[1].clientX;
+        const dy = e.touches[0].clientY - e.touches[1].clientY;
+        touchPinchStartDist = Math.hypot(dx, dy);
+        touchPinchStartZoom = zoomX;
+        return;
+    }
+
+    if (e.touches.length === 1) {
+        const t = e.touches[0];
+        const pt = canvasPointFromTouch(t);
+        crossX = pt.x; crossY = pt.y; isOverCanvas = true;
+
+        if (drawingTool === 'line') {
+            isDrawing = true;
+            drawStart = { x: pt.x, y: pt.y };
+            drawCurrent = { x: pt.x, y: pt.y };
+        } else if (drawingTool === 'pencil') {
+            isDrawing = true;
+            pencilStrokes = [{ x: pt.x, y: pt.y }];
+        } else {
+            const rect = canvas.getBoundingClientRect();
+            const localX = (t.clientX - rect.left) * (canvas.width / rect.width);
+            isDraggingPricePanel = localX > (canvas.width - prWidth);
+            isTouchPanning = !isDraggingPricePanel;
+            dragStartX = t.clientX;
+            dragStartY = t.clientY;
+        }
+    }
+}, { passive: false });
+
+canvas.addEventListener('touchmove', (e) => {
+    e.preventDefault();
+
+    if (e.touches.length === 2 && touchPinchStartDist) {
+        const dx = e.touches[0].clientX - e.touches[1].clientX;
+        const dy = e.touches[0].clientY - e.touches[1].clientY;
+        const dist = Math.hypot(dx, dy);
+        zoomX = Math.max(0.3, Math.min(5, touchPinchStartZoom * (dist / touchPinchStartDist)));
+        render();
+        return;
+    }
+
+    if (e.touches.length === 1) {
+        const t = e.touches[0];
+        const pt = canvasPointFromTouch(t);
+        crossX = pt.x; crossY = pt.y; isOverCanvas = true;
+
+        if (isDrawing && drawingTool === 'line') {
+            drawCurrent = { x: pt.x, y: pt.y };
+            render();
+            drawPreviewLine();
+            return;
+        }
+        if (isDrawing && drawingTool === 'pencil') {
+            pencilStrokes.push({ x: pt.x, y: pt.y });
+            render();
+            drawPencilPreview();
+            return;
+        }
+        if (isTouchPanning && drawingTool === 'cursor' && !isDraggingPricePanel) {
+            const dx = t.clientX - dragStartX;
+            const dy = t.clientY - dragStartY;
+            dragStartX = t.clientX;
+            dragStartY = t.clientY;
+            hOffset += dx;
+            vOffset += dy;
+            render();
+            return;
+        }
+        if (isDraggingPricePanel && drawingTool === 'cursor') {
+            const dy = t.clientY - dragStartY;
+            dragStartY = t.clientY;
+            priceStretch = Math.max(0.2, Math.min(5.0, priceStretch - dy * 0.01));
+            render();
+            return;
+        }
+        render();
+    }
+}, { passive: false });
+
+function endTouchInteraction(e) {
+    e.preventDefault();
+    touchPinchStartDist = null;
+
+    if (e.touches.length === 0) {
+        const ct = e.changedTouches && e.changedTouches[0];
+        if (ct && isDrawing) {
+            const pt = canvasPointFromTouch(ct);
+            if (drawingTool === 'line') finishLineDrawingAt(pt.x, pt.y);
+            else if (drawingTool === 'pencil') finishPencilDrawingNow();
+        }
+        isTouchPanning = false;
+        isDraggingChart = false;
+        isDraggingPricePanel = false;
+    } else if (e.touches.length === 1) {
+        // Lifted one finger out of a pinch — resume panning smoothly
+        dragStartX = e.touches[0].clientX;
+        dragStartY = e.touches[0].clientY;
+        isTouchPanning = (drawingTool === 'cursor');
+    }
+}
+
+canvas.addEventListener('touchend', endTouchInteraction, { passive: false });
+canvas.addEventListener('touchcancel', endTouchInteraction, { passive: false });
+
+function beginSimulation() {
+    const saved = localStorage.getItem('mechaMarket');
+    if(saved) { const obj = JSON.parse(saved); cash = obj.cash ?? 1000; positions = obj.positions ?? []; }
+    let currentP = 50; for(let i=0; i<300; i++) currentP = addStep(currentP);
+    render(); updateUI();
+    if (tickInterval) clearInterval(tickInterval);
+    tickInterval = setInterval(() => {
+        addStep(data[data.length-1].close); render();
+        localStorage.setItem('mechaMarket', JSON.stringify({cash, positions}));
+    }, 1000);
+}
+
+function proceedAfterModeSelected() {
+    // Check if budget already set
+    if (!localStorage.getItem('initialBudgetSet')) {
+        // Show budget dialog first
+        document.getElementById('budget-overlay').style.display = 'flex';
+    } else {
+        // Load saved budget or default
+        const saved = localStorage.getItem('mechaMarket');
+        if (saved) {
+            const d = JSON.parse(saved);
+            cash = d.cash || 1000;
+        }
+        beginSimulation();
+    }
+
+    // Delay resize to let layout settle then resize again
+    requestAnimationFrame(() => {
+        resizeChartForLayout();
+        render();
+        // Second resize after layout fully settles
+        setTimeout(() => {
+            resizeChartForLayout();
+            render();
+        }, 100);
+    });
+}
+
+function initApp() {
+    const savedDeviceMode = localStorage.getItem(DEVICE_MODE_KEY);
+
+    if (savedDeviceMode === 'pc' || savedDeviceMode === 'mobile') {
+        // Returning visitor — apply their remembered choice, no prompt needed
+        applyDeviceMode(savedDeviceMode);
+        proceedAfterModeSelected();
+    } else {
+        // First-ever launch — ask once, then remember it forever
+        document.getElementById('mode-overlay').style.display = 'flex';
+    }
+
+    applyI18n();
+}
+
+let resizeRo = null;
+function setupResizeObserver() {
+    if (resizeRo) return;
+    resizeRo = new ResizeObserver(() => {
+        resizeChartForLayout();
+        render();
+    });
+    const wrap = document.getElementById('chart-canvas-wrap');
+    if (wrap) resizeRo.observe(wrap);
+}
+
+// Budget dialog handler
+document.addEventListener('DOMContentLoaded', () => {
+    const setBudgetBtn = document.getElementById('set-budget-btn');
+    const budgetOverlay = document.getElementById('budget-overlay');
+    const budgetInput = document.getElementById('budget-input');
+
+    if (setBudgetBtn && budgetOverlay && budgetInput) {
+        setBudgetBtn.addEventListener('click', () => {
+            const budget = parseInt(budgetInput.value, 10);
+            if (budget >= 100 && budget <= 10000000) {
+                cash = budget;
+                localStorage.setItem('initialBudgetSet', 'true');
+                budgetOverlay.style.display = 'none';
+                beginSimulation();
+                // Delay resize to let layout settle then resize again
+                requestAnimationFrame(() => {
+                    resizeChartForLayout();
+                    render();
+                    setTimeout(() => {
+                        resizeChartForLayout();
+                        render();
+                    }, 100);
+                });
+            }
+        });
+    }
+
+    // Device mode picker (PC vs Mobile) — shown once, remembered forever after
+    const modeOverlay = document.getElementById('mode-overlay');
+    const choosePcBtn = document.getElementById('choose-pc-btn');
+    const chooseMobileBtn = document.getElementById('choose-mobile-btn');
+
+    function selectDeviceMode(mode) {
+        localStorage.setItem(DEVICE_MODE_KEY, mode);
+        applyDeviceMode(mode);
+        if (modeOverlay) modeOverlay.style.display = 'none';
+        proceedAfterModeSelected();
+    }
+
+    if (choosePcBtn) choosePcBtn.addEventListener('click', () => selectDeviceMode('pc'));
+    if (chooseMobileBtn) chooseMobileBtn.addEventListener('click', () => selectDeviceMode('mobile'));
+});
+
+// Drawing tools state - Cursor, Line, and Pencil
+let drawingTool = 'cursor';
+let drawings = [];
+let isDrawing = false;
+let drawStart = null;
+let drawCurrent = null;
+let pencilStrokes = []; // Array of points for freehand drawing
+
+// Tool buttons
+document.querySelectorAll('.tv-tool').forEach(tool => {
+    tool.addEventListener('click', () => {
+        // Don't activate delete button visually
+        if (tool.getAttribute('title') === 'Delete') return;
+        
+        document.querySelectorAll('.tv-tool').forEach(t => t.classList.remove('active'));
+        tool.classList.add('active');
+        
+        const toolType = tool.getAttribute('title').toLowerCase();
+        if (toolType === 'cursor') {
+            drawingTool = 'cursor';
+            canvas.style.cursor = 'default';
+        } else if (toolType === 'line') {
+            drawingTool = 'line';
+            canvas.style.cursor = 'crosshair';
+            showToast('Line: Click and drag to draw');
+        } else if (toolType === 'pencil') {
+            drawingTool = 'pencil';
+            canvas.style.cursor = 'crosshair';
+            showToast('Pencil: Freehand drawing');
+        }
+    });
+});
+
+function deleteLastDrawing() {
+    if (drawings.length === 0) {
+        showToast('No drawings to delete');
+        return;
+    }
+    drawings.pop();
+    render();
+    showToast('Last drawing deleted');
+}
+
+function showToast(msg) {
+    const existing = document.querySelector('.tv-toast');
+    if (existing) existing.remove();
+    
+    const toast = document.createElement('div');
+    toast.className = 'tv-toast';
+    toast.textContent = msg;
+    toast.style.cssText = 'position:fixed;bottom:60px;left:50%;transform:translateX(-50%);background:rgba(30,34,45,0.95);color:#fff;padding:8px 16px;border-radius:4px;font-size:12px;z-index:1000;border:1px solid var(--border);';
+    document.body.appendChild(toast);
+    setTimeout(() => toast.remove(), 2000);
+}
+
+// Separate handlers for drawing vs chart manipulation
+let isDraggingChart = false;
+let dragStartX, dragStartY;
+
+// Helper: Convert pixel Y to price
+function pixelToPrice(pixelY, maxP, pRange, ch, pt, vOffset) {
+    return maxP - ((pixelY - pt - vOffset) / ch) * pRange;
+}
+
+// Helper: Convert price to pixel Y
+function priceToPixel(price, maxP, pRange, ch, pt, vOffset) {
+    return pt + ((maxP - price) / pRange) * ch + vOffset;
+}
+
+// Mouse down - determine if drawing or dragging chart
+canvas.addEventListener('mousedown', (e) => {
+    if (drawingTool === 'line') {
+        // Start drawing line
+        isDrawing = true;
+        const rect = canvas.getBoundingClientRect();
+        const x = (e.clientX - rect.left) * (canvas.width / rect.width);
+        const y = (e.clientY - rect.top) * (canvas.height / rect.height);
+        drawStart = { x: x, y: y };
+        drawCurrent = { x: x, y: y };
+    } else if (drawingTool === 'pencil') {
+        // Start pencil drawing
+        isDrawing = true;
+        pencilStrokes = [];
+        const rect = canvas.getBoundingClientRect();
+        const x = (e.clientX - rect.left) * (canvas.width / rect.width);
+        const y = (e.clientY - rect.top) * (canvas.height / rect.height);
+        pencilStrokes.push({ x, y });
+    } else if (drawingTool === 'cursor') {
+        // Start dragging chart only when cursor tool is active
+        isDraggingChart = true;
+        dragStartX = e.clientX;
+        dragStartY = e.clientY;
+        // Check if clicking on price panel (Y-axis area on right side) for stretch mode
+        const rect = canvas.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        isDraggingPricePanel = x > (canvas.width - prWidth);
+    }
+});
+
+// Helper: Convert pixel X to candle index (fractional, no snapping)
+function pixelToCandleIndex(pixelX, cw, spacing, dataLen) {
+    const i = dataLen - 1 - (cw - (pixelX - hOffset) - (spacing * 0.5)) / spacing;
+    return i; // Don't round - keep fractional for exact positioning
+}
+
+// Helper: Convert candle index to pixel X
+function candleIndexToPixelX(idx, cw, spacing, dataLen) {
+    return cw - ((dataLen - 1 - idx) * spacing) - (spacing * 0.5) + hOffset;
+}
+
+// Helper: Convert pixel Y to price
+function pixelYToPrice(pixelY, pt, ch, maxP, pRange) {
+    return maxP - ((pixelY - pt - vOffset) / ch) * pRange;
+}
+
+// Helper: Convert price to pixel Y
+function priceToPixelY(price, pt, ch, maxP, pRange) {
+    return pt + ((maxP - price) / pRange) * ch + vOffset;
+}
+
+// Mouse up - finish drawing or stop dragging
+canvas.addEventListener('mouseup', (e) => {
+    // Stop dragging
+    isDraggingChart = false;
+    isDragging = false;
+    isDraggingPricePanel = false;
+
+    const rect = canvas.getBoundingClientRect();
+    const cw = canvas.width - prWidth;
+    const pt = 15, pb = 0, volAreaHeight = canvas.height * 0.25;
+    const ch = canvas.height - (pt + pb) - volAreaHeight;
+    const spacing = Math.max(3, 6 * zoomX);
+    const visibleCount = Math.ceil(cw / spacing) + 2;
+    const visibleData = data.slice(-visibleCount);
+    
+    if (!visibleData.length) {
+        isDrawing = false;
+        drawStart = null;
+        drawCurrent = null;
+        pencilStrokes = [];
+        render();
+        isDraggingChart = false;
+        return;
+    }
+    
+    const prices = visibleData.flatMap(d => [d.high, d.low]);
+    const rawMin = Math.min(...prices), rawMax = Math.max(...prices);
+    const range = rawMax - rawMin || 1;
+    const effectiveRange = range * priceStretch;
+    const minP = rawMin - (effectiveRange - range) / 2;
+    const maxP = rawMax + (effectiveRange - range) / 2;
+    const pRange = maxP - minP;
+
+    if (isDrawing && drawingTool === 'line') {
+        const endX = (e.clientX - rect.left) * (canvas.width / rect.width);
+        const endY = (e.clientY - rect.top) * (canvas.height / rect.height);
+        
+        // Only save if dragged a meaningful distance
+        const dist = Math.hypot(endX - drawStart.x, endY - drawStart.y);
+        if (dist > 5) {
+            const colorPicker = document.getElementById('drawing-color');
+            const lineColor = colorPicker ? colorPicker.value : '#2962ff';
+            // Store candle indices and prices so line follows chart
+            drawings.push({
+                candleIdx1: pixelToCandleIndex(drawStart.x, cw, spacing, data.length),
+                candleIdx2: pixelToCandleIndex(endX, cw, spacing, data.length),
+                price1: pixelYToPrice(drawStart.y, pt, ch, maxP, pRange),
+                price2: pixelYToPrice(endY, pt, ch, maxP, pRange),
+                color: lineColor
+            });
+        }
+        
+        isDrawing = false;
+        drawStart = null;
+        drawCurrent = null;
+        render();
+    } else if (isDrawing && drawingTool === 'pencil') {
+        // Save pencil drawing with candle indices and prices
+        if (pencilStrokes.length > 2) {
+            const colorPicker = document.getElementById('drawing-color');
+            const points = pencilStrokes.map(point => ({
+                candleIdx: pixelToCandleIndex(point.x, cw, spacing, data.length),
+                price: pixelYToPrice(point.y, pt, ch, maxP, pRange)
+            }));
+            drawings.push({
+                type: 'pencil',
+                points: points,
+                color: colorPicker ? colorPicker.value : '#2962ff'
+            });
+        }
+        isDrawing = false;
+        pencilStrokes = [];
+        render();
+    }
+    isDraggingChart = false;
+});
+
+// Cancel drawing on mouse leave
+canvas.addEventListener('mouseleave', () => {
+    if (isDrawing) {
+        if (drawingTool === 'pencil' && pencilStrokes.length > 2) {
+            // Save partial pencil drawing on mouse leave
+            const rect = canvas.getBoundingClientRect();
+            const cw = canvas.width - prWidth;
+            const pt = 15, pb = 0, volAreaHeight = canvas.height * 0.25;
+            const ch = canvas.height - (pt + pb) - volAreaHeight;
+            const spacing = Math.max(3, 6 * zoomX);
+            const visibleCount = Math.ceil(cw / spacing) + 2;
+            const visibleData = data.slice(-visibleCount);
+            
+            if (visibleData.length) {
+                const prices = visibleData.flatMap(d => [d.high, d.low]);
+                const rawMin = Math.min(...prices), rawMax = Math.max(...prices);
+                const range = rawMax - rawMin || 1;
+                const effectiveRange = range * priceStretch;
+                const minP = rawMin - (effectiveRange - range) / 2;
+                const maxP = rawMax + (effectiveRange - range) / 2;
+                const pRange = maxP - minP;
+                
+                const colorPicker = document.getElementById('drawing-color');
+                const points = pencilStrokes.map(point => ({
+                    candleIdx: pixelToCandleIndex(point.x, cw, spacing, data.length),
+                    price: pixelYToPrice(point.y, pt, ch, maxP, pRange)
+                }));
+                drawings.push({
+                    type: 'pencil',
+                    points: points,
+                    color: colorPicker ? colorPicker.value : '#2962ff'
+                });
+            }
+        }
+        isDrawing = false;
+        drawStart = null;
+        drawCurrent = null;
+        pencilStrokes = [];
+        render();
+    }
+    isDraggingChart = false;
+    isDraggingPricePanel = false;
+});
+
+// Get current chart price range for drawing
+function getChartPriceRange() {
+    const pt = 15, pb = 0, volAreaHeight = canvas.height * 0.25, cw = canvas.width - prWidth, ch = canvas.height - (pt + pb) - volAreaHeight;
+    const spacing = Math.max(3, 6 * zoomX), visibleCount = Math.ceil(cw / spacing) + 2, visibleData = data.slice(-visibleCount);
+    if (!visibleData.length) return null;
+    const prices = visibleData.flatMap(d => [d.high, d.low]);
+    const rawMin = Math.min(...prices), rawMax = Math.max(...prices);
+    const range = rawMax - rawMin || 1;
+    const effectiveRange = range * priceStretch;
+    const minP = rawMin - (effectiveRange - range) / 2;
+    const maxP = rawMax + (effectiveRange - range) / 2;
+    const pRange = maxP - minP;
+    return { pt, pb, ch, cw, maxP, pRange, vOffset };
+}
+
+function drawPreviewLine() {
+    if (!drawStart || !drawCurrent) return;
+
+    ctx.save();
+    ctx.beginPath();
+    ctx.rect(0, 0, canvas.width - prWidth, canvas.height);
+    ctx.clip();
+
+    const colorPicker = document.getElementById('drawing-color');
+    ctx.strokeStyle = colorPicker ? colorPicker.value : '#2962ff';
+    ctx.lineWidth = 2;
+    ctx.setLineDash([5, 5]); // Dashed for preview
+    ctx.beginPath();
+    ctx.moveTo(drawStart.x, drawStart.y);
+    ctx.lineTo(drawCurrent.x, drawCurrent.y);
+    ctx.stroke();
+
+    ctx.restore();
+}
+
+
+// Draw saved drawings - lines follow chart movement
+function drawSavedDrawings() {
+    if (!drawings.length) return;
+    
+    const pt = 15, pb = 0, volAreaHeight = canvas.height * 0.25;
+    const cw = canvas.width - prWidth;
+    const ch = canvas.height - (pt + pb) - volAreaHeight;
+    const spacing = Math.max(3, 6 * zoomX);
+    const visibleCount = Math.ceil(cw / spacing) + 2;
+    const visibleData = data.slice(-visibleCount);
+    
+    if (!visibleData.length) return;
+    
+    const prices = visibleData.flatMap(d => [d.high, d.low]);
+    const rawMin = Math.min(...prices), rawMax = Math.max(...prices);
+    const range = rawMax - rawMin || 1;
+    const effectiveRange = range * priceStretch;
+    const minP = rawMin - (effectiveRange - range) / 2;
+    const maxP = rawMax + (effectiveRange - range) / 2;
+    const pRange = maxP - minP;
+    
+    const getY = (p) => pt + ((maxP - p) / pRange) * ch + vOffset;
+    
+    ctx.save();
+    ctx.beginPath();
+    ctx.rect(0, 0, cw, canvas.height);
+    ctx.clip();
+    
+    ctx.lineWidth = 2;
+    ctx.setLineDash([]);
+    
+    drawings.forEach(d => {
+        
+        if (d.type === 'pencil') {
+            // Draw pencil strokes - convert candle/price to pixels
+            if (d.points && d.points.length > 1) {
+                ctx.strokeStyle = d.color || '#2962ff';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                let firstVisible = false;
+                d.points.forEach((point, i) => {
+                    const x = candleIndexToPixelX(point.candleIdx, cw, spacing, data.length);
+                    const y = priceToPixelY(point.price, pt, ch, maxP, pRange);
+                    if (i === 0) {
+                        ctx.moveTo(x, y);
+                        firstVisible = x > -50 && x < cw + 50;
+                    } else {
+                        ctx.lineTo(x, y);
+                    }
+                });
+                ctx.stroke();
+            }
+        } else {
+            // Regular line drawing - convert candle/price to pixels
+            const x1 = candleIndexToPixelX(d.candleIdx1, cw, spacing, data.length);
+            const x2 = candleIndexToPixelX(d.candleIdx2, cw, spacing, data.length);
+            const y1 = priceToPixelY(d.price1, pt, ch, maxP, pRange);
+            const y2 = priceToPixelY(d.price2, pt, ch, maxP, pRange);
+
+            const xVisible = (x1 > -50 && x1 < cw + 50) || (x2 > -50 && x2 < cw + 50) ||
+                             (x1 < -50 && x2 > cw + 50) || (x2 < -50 && x1 > cw + 50);
+            if (xVisible) {
+                ctx.strokeStyle = d.color || '#2962ff';
+                ctx.beginPath();
+                ctx.moveTo(x1, y1);
+                ctx.lineTo(x2, y2);
+                ctx.stroke();
+            }
+        }
+    });
+    
+    ctx.restore();
+}
+
+function drawPencilPreview() {
+    if (pencilStrokes.length < 2) return;
+
+    ctx.save();
+    ctx.beginPath();
+    ctx.rect(0, 0, canvas.width - prWidth, canvas.height);
+    ctx.clip();
+
+    const colorPicker = document.getElementById('drawing-color');
+    ctx.strokeStyle = colorPicker ? colorPicker.value : '#2962ff';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    pencilStrokes.forEach((point, i) => {
+        if (i === 0) {
+            ctx.moveTo(point.x, point.y);
+        } else {
+            ctx.lineTo(point.x, point.y);
+        }
+    });
+    ctx.stroke();
+
+    ctx.restore();
+}
+
+// Modify render to draw saved drawings - integrate with existing override
+const renderWithCrosshair = render;
+render = function() {
+    renderWithCrosshair();
+    drawSavedDrawings();
+    if (isDrawing) {
+        if (drawingTool === 'line') drawPreviewLine();
+        else if (drawingTool === 'pencil') drawPencilPreview();
+    }
+};
+
+window.addEventListener('resize', () => {
+    resizeChartForLayout();
+    render();
+});
+
+window.addEventListener('orientationchange', () => {
+    setTimeout(() => {
+        resizeChartForLayout();
+        render();
+    }, 150);
+});
+
+// Initial app startup - resolves remembered device mode (or asks once)
+window.addEventListener('load', () => {
+    setupResizeObserver();
+    initApp();
+});
+</script>
+</body>
+</html>
